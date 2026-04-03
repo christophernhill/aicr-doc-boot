@@ -1,18 +1,14 @@
 # aicr-doc-boot
 
-We need to write a lot of documentation for [docs.aicr.ai](https://docs.aicr.ai) and nobody has enough time. This repo is an experiment in getting AI to do some of the grunt work.
+This repo is me experimenting in trying AI to do some work.
 
-AICR is a multi-institutional HPC cluster at the [MGHPCC](https://www.mghpcc.org/) in Holyoke, MA, serving researchers at BU, Harvard, MIT, Northeastern, UMass, and Yale. It's part of the [Massachusetts AI Hub](https://aihub.masstech.org/), supported by the participating universities and the Commonwealth of Massachusetts. The cluster exists; the documentation mostly doesn't yet.
+The cluster is defined in 50+ Infrastrucutre as Code repos — Slurm configs, storage mounts, network services, etc... There's also a separate repo of machine-generated technical notes covering the whole stack. Between them, information potentially exists that could help with user docs, but it's scattered across infrastructure code that nobody should read. e.g. can we turn `slurm.conf.j2` into "here's how to submit a job,"!
 
-## The problem
-
-The cluster is defined in 50+ Ansible repos — Slurm configs, storage mounts, network services, the works. There's also a separate repo of machine-generated technical notes covering the whole stack. Between them, the information exists to write good user docs, but it's scattered across infrastructure code that researchers should never have to read. Someone needs to turn `slurm.conf.j2` into "here's how to submit a job," and there are a dozen pages like that to write.
-
-## The idea
+## The *theory* !!
 
 Give an AI agent a detailed persona file (`DOC_AGENT_PERSONALITY.md`) that explains the cluster, the audience, the writing style, and where to find the facts. Point it at the infrastructure repos. Ask it to draft documentation pages. Then have humans review what comes out and decide what's usable.
 
-The persona file is the interesting part — it's about 700 lines and covers everything from sentence-length targets to a verified facts table to a list of things the agent should never expose to users (internal IPs, Ansible role names, etc.). It also maps each section of the docs site to the specific repos and files the agent should consult.
+The persona file is one interesting part — it's about 700 lines and covers everything from sentence-length targets to a verified facts table to a list of things the agent should never expose to users (internal IPs, Ansible role names, etc.). It also maps each section of the docs site to the specific repos and files the agent should consult.
 
 ## What the agent actually produces
 
@@ -50,9 +46,9 @@ reference-materials-and-links/ # Page indexes for 7 HPC doc sites + docs.aicr.ai
     README.md
 ```
 
-## Source repositories
+## Sources
 
-The agent needs access to two repos that aren't included here:
+The agent needs access to two repos that aren't included here - I am not sure if I can make them public! 
 
 **Infrastructure-as-code** — currently at <https://gitlab.svc.aicr.ai/> (location may change). This is the authoritative source: Ansible collections for Slurm, NFS, LDAP, Keycloak, OS config, network services, plus Warewulf node definitions, image builds, and operational technotes. The agent treats config templates as ground truth.
 
