@@ -1,26 +1,45 @@
 # aicr-doc-boot
 
-Bootstrap toolkit for producing end-user documentation for the Massachusetts AI Compute Resource (AICR) at <https://docs.aicr.ai>.
+An experiment in using AI agents to help draft end-user documentation for the Massachusetts AI Compute Resource (AICR) at <https://docs.aicr.ai>.
 
 AICR is a multi-institutional HPC cluster serving researchers at Boston University, Harvard, MIT, Northeastern, UMass (five campuses), and Yale. It is the shared compute infrastructure of the [Massachusetts AI Hub](https://aihub.masstech.org/), supported by the participating universities and the Commonwealth of Massachusetts, and physically housed at the [MGHPCC](https://www.mghpcc.org/) in Holyoke, MA.
 
-## Purpose
+## What This Is (and Isn't)
 
-The docs.aicr.ai site needs documentation pages covering software, job submission, storage, login procedures, policies, and more. Writing these pages accurately requires access to the cluster's infrastructure-as-code repositories and existing technical documentation — but the audience is researchers, not system administrators.
+This is **an experiment**, not an official tool or a finished product. The idea is to see whether AI agents, given enough context about a cluster's infrastructure, can produce documentation drafts that are useful starting points — saving humans time on the initial writing while leaving the judgment, verification, and polish to people.
 
-This repository bridges that gap. It provides:
+What works reasonably well:
+- Extracting technical facts from Ansible templates and config files
+- Structuring pages to match the conventions of peer HPC documentation sites
+- Producing consistent formatting, tables, and code examples
+- Generating a first draft faster than writing from scratch
 
-1. **A documentation agent personality** that can translate infrastructure internals into clear, user-facing guidance.
-2. **Draft pages** ready for human review and integration into the docs site.
-3. **Reference site indexes** so documentation work can draw on verified style examples without guessing URLs.
+What still requires significant human effort:
+- **Fact-checking**: The agent can read config files but may misinterpret context, confuse test environments with production, or miss recent changes. Every technical claim needs human verification.
+- **Judgment calls**: What to emphasize, what to skip, what level of detail is right for a given audience — these are editorial decisions that AI handles unevenly.
+- **Accuracy of examples**: Job scripts and commands look plausible but may not work as-is on the actual cluster. Test them.
+- **Tone**: The agent aims for "professional but approachable" and usually gets close, but can drift toward over-explaining or sounding robotic.
+- **Completeness**: The agent can only document what it finds in the source repos. If something isn't in the Ansible code or technotes, it won't appear in the draft.
+
+Treat the drafts as a head start, not a finished product. The goal is to save humans time, not replace them.
+
+## What's In Here
+
+This repository contains three things:
+
+1. **A documentation agent personality** (`DOC_AGENT_PERSONALITY.md`) — instructions and context for an AI agent, telling it how to write, where to look for facts, and what style to match.
+2. **Draft pages** (`draft-material/`) — sample documentation drafts the agent produced, with TODO markers where facts need human confirmation.
+3. **Reference site indexes** (`reference-materials-and-links/`) — catalogs of pages on peer HPC documentation sites, so agents (and humans) can find style examples without guessing URLs.
 
 ## How It Works
 
-An AI documentation agent is given `DOC_AGENT_PERSONALITY.md` as its persona. It consults two external source repositories (described below) to extract verified technical facts, then produces Markdown drafts that match the style conventions of peer HPC documentation sites. Human reviewers check the drafts before they go live.
+The basic idea: give an AI agent a detailed persona file, point it at the cluster's infrastructure code and technical notes, and ask it to write a documentation page. The agent produces a Markdown draft. A human reviews it, fixes what's wrong, fills in what's missing, and decides whether any of it is worth keeping.
+
+This is a labor-saving experiment, not an automated pipeline. The agent does the tedious first-draft work; humans do the thinking.
 
 ## Source Repositories
 
-The agent draws on two companion repositories that are **not included in this repo** but must be available locally for accurate documentation work:
+The agent draws on two companion repositories that are **not included in this repo**. For the agent to produce useful drafts, it needs local access to these (or something equivalent):
 
 ### Infrastructure-as-Code Repository
 
@@ -84,7 +103,7 @@ aicr-doc-boot/
 
 ### DOC_AGENT_PERSONALITY.md
 
-The core document. Defines the agent's voice, formatting rules, accuracy protocol, and technical knowledge. Contains:
+The core document. This is essentially a long, detailed prompt that tells the agent how to behave. It contains:
 
 - **Voice and tone**: Professional but approachable, 12–20 word sentences, imperative for procedures
 - **Formatting standards**: MkDocs Material admonitions, fenced code blocks with language tags, UPPER_CASE placeholders, `$` prefix for shell commands
@@ -113,7 +132,7 @@ Three documentation drafts targeting the highest-priority gaps on docs.aicr.ai:
 | `draft-running-jobs.md` | `/basic-slurm/` | 5 partitions, 6 job script examples, directives table, troubleshooting table |
 | `draft-filesystem-overview.md` | `/filesystem-overview/` | Storage comparison table, per-institution work paths, snapshot restoration |
 
-Each draft includes `<!-- TODO: verify -->` comments where specific values need human confirmation.
+Each draft includes `<!-- TODO: verify -->` comments where the agent flagged uncertainty. In practice, you should assume anything might be slightly wrong and verify the important parts yourself.
 
 ### Reference Site Indexes
 
@@ -121,17 +140,20 @@ Page-level indexes for seven HPC documentation sites plus docs.aicr.ai itself. E
 
 The `cross-reference-guide.md` is the entry point — it maps each AICR section (Getting Started, Software, Running Jobs, etc.) to the 3–8 best reference pages across all sites, with notes on why each is useful.
 
-## Workflow
+## Trying It Yourself
 
-1. **Give the agent `DOC_AGENT_PERSONALITY.md`** as its persona along with access to the two source repositories.
-2. **Agent reads `AGENT_INSTRUCTIONS.md`** for repository rules.
-3. **Agent consults `reference-materials-and-links/cross-reference-guide.md`** to fetch style examples for the target page.
-4. **Agent reads source material** from the infrastructure-as-code and derived documentation repos, following the source map in Section 5 of the personality file.
-5. **Agent writes a draft** to `draft-material/` and updates `DRAFT_MATERIAL_TOC.md`.
-6. **Human reviews the draft**, resolves TODO comments, and integrates approved content into the docs.aicr.ai MkDocs source.
+If you want to experiment with this approach:
+
+1. Clone this repo and have local copies of the two source repositories.
+2. Open an AI coding assistant (Claude Code, Cursor, etc.) in this directory.
+3. Tell the agent to read `DOC_AGENT_PERSONALITY.md` and `AGENT_INSTRUCTIONS.md`.
+4. Ask it to draft a specific page — for example, "write a draft for the Logging In page."
+5. Review what it produces. Some of it will be good. Some will be wrong. Some will be mediocre. That's the current state of things.
+
+The personality file tries to make the agent careful about accuracy (marking uncertainties with TODO comments, checking source files before making claims). This helps, but it's not foolproof. The agent will occasionally hallucinate a detail that sounds right, or miss context that a human would catch.
 
 ## Current Status
 
-The docs.aicr.ai site has 3 pages with content (Homepage, System Description, Getting Started) and 10+ stubs needing content. The three draft pages in this repository target the most critical gaps: Running Jobs, Software, and Filesystem Overview.
+This is an early experiment. The docs.aicr.ai site has 3 pages with content (Homepage, System Description, Getting Started) and 10+ stubs needing content. The three draft pages in this repository are a first attempt at filling the most critical gaps. Whether this approach proves more efficient than writing documentation from scratch remains to be seen — that's what we're trying to find out.
 
-See `reference-materials-and-links/aicr-docs-page-index.md` for a complete audit of the current site state, including correct URL slugs and the preview site at mghpcc.github.io.
+See `reference-materials-and-links/aicr-docs-page-index.md` for a complete audit of the current site state.
